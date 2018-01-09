@@ -3,6 +3,7 @@ pro linearfit,x,a,f,pder
        pder = [[replicate(1.,n_elements(x))],[x]]
 end
 
+
 pro cl0024ana_new,redoprepcl=redoprepcl,redoprepsdss=redoprepsdss
 ;main program for analysis section of the paper. combine previous plot_mass*.pros
 ;need the matched catalog from gals_character.pro
