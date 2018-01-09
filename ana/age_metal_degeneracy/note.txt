@@ -1,0 +1,30 @@
+The following are how to get additional uncertainties in 100417cl0024ana_new.pro and earlier
+It assumed that the uncertainties are independent of age (taking the median over several ages) and assumed symmetric gaussian uncertainty.
+1) run degeneracy to create fits files in output directory. Fits files contain chisq images of each best [Fe/H] and age value
+2) run make_worm_plot to create a plot for paper (optional)
+3) run get_uncertainty_fn.pro to create a 'uncertainty_fn_feh_sn.fits' a structure that contain theoretical uncertainties at each metallicity and SN
+
+The following are used in cl0024ana_new.pro (later than above)
+1) get_additional_uncertainties_cl0024.pro, which uses make_chisqarr_new.pro.
+It creates a grid of chisq for each galaxy and probabilities 
+2) get_prob_dist.pro  (create a 3 frames fits file: prob grid for age and metals, prob array for metals, prob array for age
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+to create mock MZR with formation redshifts and test if the age-metallcities can explain the scatter, see
+test_degeneracy_formation_time.pro
+
+Then... Evan suggested that I should use the age, mass, and noise array from observed data.
+This will be done in test_degeneracy_formation_time2.pro
+
+The first two versions above (test_degeneracy_formation_time.pro and test_degeneracy_formation_time2.pro) use MZR function from Moustakas11, Zahid13 or the log function form of gas-phase MZR. But later we found out that the log form doesn't really describe our data well nor the 2 degree polynomial (see the dotted line in Cl0024_FeH_mass_polyfit.eps). So we decided to go with the simple linear fit.
+
+y=mx+c where print, [c,m]=[-1.8654625,0.17579233] and delta[c,m]=[0.11082823,0.010527926]
+The best fit params were obtained from cl0024ana.pro
+
+So same thing as the test_degeneracy_formation_time2.pro but with this linear function is done in test_degeneracy_formation_time3.pro
+
+Then I changed the sample from early-type to passive galaxies
+so this is done in in test_degeneracy_formation_time4.pro
+
+Then things are improved more in test_degeneracy_formation_time5.pro Here the MZR linear equation has an intercept at 10^10 Msun.
+There is an evolution detected so the mock SDSS will have diff linear equation from mock CL. Also, the uncertainties now are non-gaussian.
