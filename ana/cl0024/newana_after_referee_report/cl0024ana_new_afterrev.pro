@@ -8,7 +8,7 @@ pro cl0024ana_new_afterrev
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;GETTING SCI DATA
-   sci = mrdfits('/scr2/nichal/workspace2/ana/cl0024/newana/sci_cl0024_ana.fits',1)
+   sci = mrdfits('/scr2/nichal/workspace2/ana/cl0024/newana_after_referee_report/sci_cl0024_ana_afterrev.fits',1)
    sci.logmstar = sci.logmstar-alog10(0.52^2) ;fix for the wrong calculation (should be divide by h^2 not multiply by h^2)
    probsci = mrdfits('/scr2/nichal/workspace2/ana/cl0024/newana/cl0024_feh_age_probdist.fits',1)
    ageform = (galage(sci.zfit,1000.)/1.e9-sci.age)>0. ;age of universe when it was formed
@@ -39,7 +39,7 @@ pro cl0024ana_new_afterrev
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;Get SDSS data
-   sdss = mrdfits('/scr2/nichal/workspace2/ana/cl0024/newana/sci_sdss_ana.fits',1)
+   sdss = mrdfits('/scr2/nichal/workspace2/ana/cl0024/newana_after_referee_report/sci_sdss_ana_afterrev.fits',1)
    sdss_newmass = mrdfits('/scr2/nichal/workspace2/SDSSana/gallazzi_allmass2/gallazzi_allmass2_colors_matched.fits',1)
    sdss_AG_mass = sdss.logmstar               ; this is the mass from Gallazzi06
    sdss.logmstar = sdss_newmass.kcorrect_mass ; this is kcorrect mass
@@ -287,7 +287,6 @@ pro cl0024ana_new_afterrev
     sciageform = uniagez04-sciagemean
     sdssageform = uniagez0-sdssagemean
     print, (sciageform-sdssageform)*0.01
-    stop
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;/////////////////////////////////////////////////////////////////////////////////////////////////////////////////;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -520,11 +519,10 @@ pro cl0024ana_new_afterrev
                  charsize=1,position=[10.6,-0.3],font=0
       xyouts,9.1,0.1,'(a)',charsize=1.2
    device,/close
-   stop
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   skip=0
-   if skip ne 1 then begin
+skip=1
+if skip ne 1 then begin
    psname='FEH_deviation_obs.eps'
    fehideal = cl_fixslope_pars[0]+(sci.logmstar-10.)*cl_fixslope_pars[1]
    sdss_fehideal = sdss_fixslope_pars[0]+(sdss.logmstar-10.)*sdss_fixslope_pars[1]
@@ -537,9 +535,9 @@ pro cl0024ana_new_afterrev
    probdxdyarr = transpose([[[probsdss.probdfehdage]],[[probsci.probdfehdage]]],[1,0,2])
    feh_dev_par = linfitexymc(x,y,dx,dy,dxarr,dyarr,probdxdyarr,sigma_a_b)
    feh_dev_par_sdss = linfitexymc(sdss_ageform,sdss.feh-sdss_fehideal,0.5*[sdss.ageupper-sdss.agelower],0.5*[sdss.fehupper-sdss.fehlower],-1.*probsdss.dage,probsdss.dfeh,transpose(probsdss.probdfehdage,[1,0,2]),sigma_a_b_sdss)
-   ;feh_dev_par_cl = linfitexymc(ageform,sci.feh-fehideal,0.5*[sci.ageupper-sci.agelower],0.5*[sci.fehupper-sci.fehlower],-1.*probsci.dage,probsci.dfeh,transpose(probsci.probdfehdage,[1,0,2]),sigma_a_b_cl,/plot)
-   fitexy,ageform,sci.feh-fehideal,Acl,Bcl,x_sig=0.5*[sci.ageupper-sci.agelower],y_sig=0.5*[sci.fehupper-sci.fehlower],sigma_a_b_cl
-   feh_dev_par_cl = [Acl,Bcl]
+   feh_dev_par_cl = linfitexymc(ageform,sci.feh-fehideal,0.5*[sci.ageupper-sci.agelower],0.5*[sci.fehupper-sci.fehlower],-1.*probsci.dage,probsci.dfeh,transpose(probsci.probdfehdage,[1,0,2]),sigma_a_b_cl,/plot)
+   ;fitexy,ageform,sci.feh-fehideal,Acl,Bcl,x_sig=0.5*[sci.ageupper-sci.agelower],y_sig=0.5*[sci.fehupper-sci.fehlower],sigma_a_b_cl
+   ;feh_dev_par_cl = [Acl,Bcl]
    print,'feh deviation'
    print,feh_dev_par,sigma_a_b
    print,'sdss:',feh_dev_par_sdss,sigma_a_b_sdss
@@ -567,7 +565,7 @@ pro cl0024ana_new_afterrev
       arrow,0.9,-0.37,0.3,-0.37,/data
       arrow,13.1,-0.37,13.7,-0.37,/data
    device,/close
-   endif
+endif
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    psname='FEH_deviation_fromz0line_obs.eps'
    fehideal = sdss_fixslope_pars[0]+(sci.logmstar-10.)*sdss_fixslope_pars[1]
@@ -579,13 +577,27 @@ pro cl0024ana_new_afterrev
    dxarr = -1.*[[probsdss.dage],[probsci.dage]] ;since x axis is ageuni-agegal
    dyarr = [[probsdss.dfeh],[probsci.dfeh]]
    probdxdyarr = transpose([[[probsdss.probdfehdage]],[[probsci.probdfehdage]]],[1,0,2])
-   feh_dev_par = linfitexymc(x,y,dx,dy,dxarr,dyarr,probdxdyarr,sigma_a_b)
-   feh_dev_par_sdss = linfitexymc(sdss_ageform,sdss.feh-sdss_fehideal,0.5*[sdss.ageupper-sdss.agelower],0.5*[sdss.fehupper-sdss.fehlower],-1.*probsdss.dage,probsdss.dfeh,transpose(probsdss.probdfehdage,[1,0,2]),sigma_a_b_sdss)
+
+   ;;method 1 linfitexymc
+   ;feh_dev_par = linfitexymc(x,y,dx,dy,dxarr,dyarr,probdxdyarr,sigma_a_b)
+   ;feh_dev_par_sdss = linfitexymc(sdss_ageform,sdss.feh-sdss_fehideal,0.5*[sdss.ageupper-sdss.agelower],0.5*[sdss.fehupper-sdss.fehlower],-1.*probsdss.dage,probsdss.dfeh,transpose(probsdss.probdfehdage,[1,0,2]),sigma_a_b_sdss)
    ;feh_dev_par_cl = linfitexymc(ageform,sci.feh-fehideal,0.5*[sci.ageupper-sci.agelower],0.5*[sci.fehupper-sci.fehlower],-1.*probsci.dage,probsci.dfeh,transpose(probsci.probdfehdage,[1,0,2]),sigma_a_b_cl,/plot)
-   fitexy,ageform,sci.feh-fehideal,Acl,Bcl,x_sig=0.5*[sci.ageupper-sci.agelower],y_sig=0.5*[sci.fehupper-sci.fehlower],sigma_a_b_cl
-   feh_dev_par_cl = [Acl,Bcl]
+   ;;method 2
+   ;fitexy,ageform,sci.feh-fehideal,Acl,Bcl,x_sig=0.5*[sci.ageupper-sci.agelower],y_sig=0.5*[sci.fehupper-sci.fehlower],sigma_a_b_cl
+   ;feh_dev_par_cl = [Acl,Bcl]
+   ;;method 3  Evan's ab96 code /raid/idl/enk/ab96.pro from Akritas and Bershady 1996
+   feh_dev_par = ab96(x,y,dx,dy,3,sigma=sigma_a_b)
+   xcl = ageform
+   ycl = sci.feh-fehideal
+   dxcl = 0.5*[sci.ageupper-sci.agelower]
+   dycl = 0.5*[sci.fehupper-sci.fehlower]
+   goodcl = where(ageform le 7.,complement=badcl) ;only take the galaxies that formed long ago
+   feh_dev_par_cl = ab96(xcl,ycl,dxcl,dycl,3,sigma=sigma_a_b_cl) 
+   ;feh_dev_par_cl = ab96(xcl(goodcl),ycl(goodcl),dxcl(goodcl),dycl(goodcl),2,sigma=sigma_a_b_cl)
+   feh_dev_par_sdss = ab96(sdss_ageform,sdss.feh-sdss_fehideal,0.5*[sdss.ageupper-sdss.agelower],0.5*[sdss.fehupper-sdss.fehlower],3,sigma=sigma_a_b_sdss)  
+
    print,'feh deviation'
-   print,feh_dev_par,sigma_a_b
+   print,'combined',feh_dev_par,sigma_a_b
    print,'sdss:',feh_dev_par_sdss,sigma_a_b_sdss
    print,'cl:',feh_dev_par_cl,sigma_a_b_cl
    wslope = wmean([feh_dev_par_sdss[1],feh_dev_par_cl[1]],[sigma_a_b_sdss[1],sigma_a_b_cl[1]],error=wslope_err)
@@ -599,8 +611,8 @@ pro cl0024ana_new_afterrev
       cgplot,sdss_ageform,sdss.feh-sdss_fehideal,psym=16,/overplot,symsize=0.5,color='ygb5'
       cgplot,ageform,sci.feh-fehideal,psym=14,/overplot,color='org4'
       oplot,[0,14],feh_dev_par(0)+feh_dev_par(1)*[0,14],thick=2
-      oplot,[0,14],feh_dev_par_sdss(0)+feh_dev_par_sdss(1)*[0,14],thick=2,linestyle=2,color=fsc_color('blu5')
-      oplot,[0,14],feh_dev_par_cl(0)+feh_dev_par_cl(1)*[0,14],thick=2,linestyle=2,color=fsc_color('org6')
+      ;oplot,[0,14],feh_dev_par_sdss(0)+feh_dev_par_sdss(1)*[0,14],thick=2,linestyle=2,color=fsc_color('blu5')
+      ;oplot,[0,14],feh_dev_par_cl(0)+feh_dev_par_cl(1)*[0,14],thick=2,linestyle=2,color=fsc_color('org6')
 
       cgerrplot,[12.],-0.25+[median([sdss.fehlower-sdss.feh,sci.fehlower-sci.feh])],-0.25+[median([sdss.fehupper-sdss.feh,sci.fehupper-sci.feh])]
       cgerrplot,-0.25,12.+[median([sdss.agelower-sdss.age,sci.agelower-sci.age])],12.+[median([sdss.ageupper-sdss.age,sci.ageupper-sci.age])],/horizontal
@@ -612,6 +624,36 @@ pro cl0024ana_new_afterrev
       arrow,13.1,-0.37,13.7,-0.37,/data
    device,/close
 
+   mkplottest,sci,sdss,ageform,sdss_ageform,fehideal,sdss_fehideal
+stop
+
+   psname='FEH_deviation_fromz0line_obs_color_EW.eps'
+
+   scioii = sci.oiiew*(-1.) ;change from negative=emission line to positive = emission line
+   rangeoii = [-10,5.]
+   color_cl = BytScl(scioii,min=rangeoii[0],max=rangeoii[1],top=23) ;the real range is -10,7
+   sdssha = sdss.haew*(-1.)
+   rangeha = [-3,1.]
+   color_sdss = BytScl(scioii,min=rangeha[0],max=rangeha[1],top=23) ;the real range is -3,2
+   device, filename = psname,xsize = 15,ysize = 15, $
+      xoffset = 0,yoffset = 0,scale_factor = 1.0,/encapsulated,/color
+      plot,sdss_ageform,sdss.feh-sdss_fehideal,psym=1,xtitle='Age of the universe at galaxy formation',ytitle=delta+'[Fe/H]',xrange=[0,14],xstyle=9,yrange=[-0.4,0.4],/nodata,position=[0.15,0.15,0.95,0.7]
+      axis,xaxis=0,xstyle=1,xrange=[0,14]
+      axis,xaxis=1,xticks=4,xtickv=[1.558,3.316, 5.903, 8.628,13.712],xtickn=['4','2','1','0.5','0'],xtitle='z'
+      cgLoadCT,33,Ncolors=24
+      for i=0,23 do begin
+          inrange = where(color_cl eq i,cinrange)
+          if cinrange gt 0 then cgplot,ageform(inrange),sci(inrange).feh-fehideal(inrange),psym=14,/overplot,color=i
+          inrange = where(color_sdss eq i,cinrange)
+          if cinrange gt 0 then cgplot,sdss_ageform(inrange),sdss(inrange).feh-sdss_fehideal(inrange),$
+                                       psym=16,/overplot,symsize=0.5,color=i
+      endfor
+      cgColorbar, NColors=24,divisions=5,Range=rangeoii, Title='EW (A)', $
+       TLocation='top', /Discrete,Position=[0.125, 0.86, 0.9, 0.90],charsize=1
+
+   device,/close
+
+   stop
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;Write table for latex

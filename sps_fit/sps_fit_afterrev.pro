@@ -2590,7 +2590,8 @@ pro sps_fit::getscience, files=files
     common mosfire, mosflag, deimosflag, lrisflag
    
     case 1 of
-        strmid(mask_in, 0, 4) eq '0024' or strmid(mask_in, 0, 3) eq 'rse' or strmid(mask_in,0,10) eq 'all_cl0024': begin
+        strmid(mask_in, 0, 4) eq '0024' or strmid(mask_in, 0, 3) eq 'rse' or strmid(mask_in,0,10) eq 'all_cl0024'$
+        or strmid(mask_in,0,10) eq 'sci_cl0024': begin
             photfile = '/scr2/nichal/keck/deimos/Cl0024MS0451/Cl0024master.v7.fits.gz'
             vdispfile ='/scr2/nichal/keck/deimos/Cl0024MS0451/Cl0024_sigmas.txt'
             readcol, vdispfile, vd_objname, vd_vdisp, format='A,D', comment='#', /silent
@@ -3281,7 +3282,7 @@ pro science__define
 end
 
 
-pro sps_fit, mask
+pro sps_fit_afterrev, mask
     common mosfire, mosflag, deimosflag, lrisflag
     common mask_in, mask_in
     mask_in = mask
